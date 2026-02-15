@@ -1,4 +1,4 @@
-# Guard Patrolling System (Django)
+# Guard Patrolling System 
 
 ## What the system should do 
 ### Core Idea 
