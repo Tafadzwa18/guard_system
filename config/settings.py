@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'dashboard',
     'patrols',
+    'incidents',
     'django.contrib.humanize',
 ]
 

@@ -7,7 +7,11 @@
     <h3 class="mb-0">{{ session.route.name }}</h3>
     <div class="text-muted small">Started: {{ session.started_at }}</div>
   </div>
-  <a class="btn btn-danger" href="{% url 'end_patrol' session.id %}">End Patrol</a>
+  <div class="gap-2">
+    <a class="btn btn-danger" href="{% url 'end_patrol' session.id %}">End Patrol</a>
+    <a class="btn btn-outline-danger" href="{% url 'create_incident' session.id %}">Report Incident</a>
+  </div>
+
 </div>
 
 <div class="card shadow-sm mb-3">
