@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Patrol Summary{% endblock %}
+{% block content %}
+<div class="mb-3">
+  <div class="small text-muted">{{ session.route.site.name }}</div>
+  <h3 class="mb-0">{{ session.route.name }} Summary</h3>
+  <div class="text-muted small">
+    Started: {{ session.started_at }} |
+    {% if session.ended_at %}Ended: {{ session.ended_at }}{% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Completed ({{ completed|length }})</h5>
+        <ul class="mb-0">
+          {% for cp in completed %}
+            <li>{{ cp.order_index }}. {{ cp.name }}</li>
+          {% empty %}
+            <li>None</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Missed ({{ missed|length }})</h5>
+        <ul class="mb-0">
+          {% for cp in missed %}
+            <li>{{ cp.order_index }}. {{ cp.name }}</li>
+          {% empty %}
+            <li>None</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a class="btn btn-outline-primary mt-3" href="{% url 'guard_home' %}">Back to Home</a>
+{% endblock %}

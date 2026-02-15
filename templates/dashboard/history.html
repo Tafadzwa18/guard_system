@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Patrol History{% endblock %}
+{% block content %}
+<h3 class="mb-3">Patrol History</h3>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-4">
+    <input class="form-control" name="site" placeholder="Filter by site" value="{{ request.GET.site }}">
+  </div>
+  <div class="col-md-4">
+    <input class="form-control" name="guard" placeholder="Filter by guard username" value="{{ request.GET.guard }}">
+  </div>
+  <div class="col-md-4">
+    <input class="form-control" name="status" placeholder="Filter by status (ACTIVE/COMPLETED/FLAGGED)" value="{{ request.GET.status }}">
+  </div>
+  <div class="col-12">
+    <button class="btn btn-outline-primary">Apply filters</button>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Guard</th>
+            <th>Site</th>
+            <th>Route</th>
+            <th>Status</th>
+            <th>Started</th>
+            <th>Ended</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr>
+            <td>{{ s.guard.username }}</td>
+            <td>{{ s.route.site.name }}</td>
+            <td>{{ s.route.name }}</td>
+            <td>{{ s.status }}</td>
+            <td>{{ s.started_at }}</td>
+            <td>{{ s.ended_at|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-muted">No sessions found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

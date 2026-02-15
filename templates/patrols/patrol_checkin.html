@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Patrol Check-in{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <div class="small text-muted">{{ session.route.site.name }}</div>
+    <h3 class="mb-0">{{ session.route.name }}</h3>
+    <div class="text-muted small">Started: {{ session.started_at }}</div>
+  </div>
+  <a class="btn btn-danger" href="{% url 'end_patrol' session.id %}">End Patrol</a>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5 class="mb-3">Check in</h5>
+    <form method="post" class="row g-2">
+      {% csrf_token %}
+      <div class="col-md-6">{{ form.code.label_tag }} {{ form.code }}</div>
+      <div class="col-md-6">{{ form.notes.label_tag }} {{ form.notes }}</div>
+      <div class="col-12">
+        <button class="btn btn-primary">Submit Check-in</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5 class="mb-3">Checkpoint list</h5>
+    <ul class="list-group">
+      {% for cp in checkpoints %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold">{{ cp.order_index }}. {{ cp.name }}</div>
+            <div class="small text-muted">Code: {{ cp.code }}</div>
+          </div>
+          {% if cp.id in checked_ids %}
+            <span class="badge bg-success">Done</span>
+          {% else %}
+            <span class="badge bg-secondary">Pending</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
