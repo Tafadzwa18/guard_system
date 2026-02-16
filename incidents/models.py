@@ -14,7 +14,9 @@ class IncidentReport(models.Model):
         CRITICAL = "CRITICAL", "Critical"
 
     session = models.ForeignKey(PatrolSession, on_delete=models.CASCADE, related_name="incidents")
-    checkpoint = models.ForeignKey(Checkpoint, on_delete=models.SET_NULL, null=True, blank=True, related_name="incidents")
+    checkpoint = models.ForeignKey(
+        Checkpoint, on_delete=models.SET_NULL, null=True, blank=True, related_name="incidents"
+    )
 
     title = models.CharField(max_length=120)
     description = models.TextField()
@@ -22,7 +24,9 @@ class IncidentReport(models.Model):
 
     photo = models.ImageField(upload_to="incident_photos/", blank=True, null=True)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="incidents_created")
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="incidents_created"
+    )
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

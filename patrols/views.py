@@ -1,11 +1,16 @@
+import base64
+from io import BytesIO
+import qrcode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
+from django.urls import reverse
 from accounts.decorators import guard_required
 from .forms import CheckInForm
 from .models import Shift, PatrolSession, Route, Checkpoint, CheckIn
+from .models import PatrolSession
 
 @login_required
 @guard_required
@@ -85,3 +90,57 @@ def patrol_summary(request, session_id):
         "patrols/patrol_summary.html",
         {"session": session, "completed": completed, "missed": missed},
     )
+
+@login_required
+@guard_required
+def qr_scan_checkin(request, session_id, code):
+    session = get_object_or_404(PatrolSession, id=session_id, guard=request.user)
+
+    if session.status != PatrolSession.Status.ACTIVE:
+        messages.info(request, "This patrol is not active.")
+        return redirect("patrol_summary", session_id=session.id)
+
+    checkpoint = Checkpoint.objects.filter(route=session.route, code=code).first()
+    if not checkpoint:
+        messages.error(request, "Invalid QR checkpoint for this route.")
+        return redirect("patrol_checkin", session_id=session.id)
+
+    try:
+        CheckIn.objects.create(session=session, checkpoint=checkpoint, method=CheckIn.Method.QR)
+        messages.success(request, f"QR check-in recorded: {checkpoint.name}")
+    except Exception:
+        messages.warning(request, "Checkpoint already checked in for this patrol.")
+
+    return redirect("patrol_checkin", session_id=session.id)
+
+@login_required
+@guard_required
+def scan_camera(request, session_id):
+    session = get_object_or_404(PatrolSession, id=session_id, guard=request.user)
+
+    if session.status != PatrolSession.Status.ACTIVE:
+        messages.info(request, "This patrol is not active.")
+        return redirect("patrol_summary", session_id=session.id)
+
+    return render(request, "patrols/scan_camera.html", {"session": session})
+
+
+@login_required
+@guard_required
+def session_qr_pack(request, session_id):
+    session = get_object_or_404(PatrolSession, id=session_id, guard=request.user)
+
+    if session.status != PatrolSession.Status.ACTIVE:
+        messages.info(request, "This patrol is not active.")
+        return redirect("patrol_summary", session_id=session.id)
+
+    items = []
+    for cp in session.route.checkpoints.all():
+        url = request.build_absolute_uri(reverse("qr_scan_checkin", args=[session.id, cp.code]))
+        img = qrcode.make(url)
+        buff = BytesIO()
+        img.save(buff, format="PNG")
+        b64 = base64.b64encode(buff.getvalue()).decode("utf-8")
+        items.append({"checkpoint": cp, "qr_b64": b64, "url": url})
+
+    return render(request, "patrols/session_qr_pack.html", {"session": session, "items": items})

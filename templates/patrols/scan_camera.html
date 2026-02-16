@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Scan QR{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <div class="small text-muted">{{ session.route.site.name }}</div>
+    <h3 class="mb-0">Scan QR</h3>
+    <div class="text-muted small">Route: {{ session.route.name }}</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'patrol_checkin' session.id %}">Back</a>
+</div>
+
+<div class="alert alert-info" id="status">
+  Starting camera…
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <video id="video" playsinline class="w-100 rounded" style="max-height: 70vh; object-fit: cover;"></video>
+    <canvas id="canvas" class="d-none"></canvas>
+  </div>
+</div>
+
+<div class="mt-3 d-flex gap-2">
+  <button class="btn btn-outline-primary" id="toggleTorch" disabled>Toggle Torch</button>
+  <button class="btn btn-outline-danger" id="stopCam">Stop Camera</button>
+</div>
+
+<script>
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const statusEl = document.getElementById("status");
+  const stopBtn = document.getElementById("stopCam");
+  const torchBtn = document.getElementById("toggleTorch");
+
+  const sessionId = "{{ session.id }}";
+  const scanUrlBase = `/guard/patrol/${sessionId}/scan/`; // expects /scan/<code>/
+  let stream = null;
+  let detector = null;
+  let scanning = true;
+  let torchOn = false;
+
+  function setStatus(msg, type="info") {
+    statusEl.className = `alert alert-${type}`;
+    statusEl.textContent = msg;
+  }
+
+  async function startCamera() {
+    try {
+      // Prefer rear camera on phones
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false
+      });
+      video.srcObject = stream;
+      await video.play();
+
+      // Torch availability (optional)
+      const track = stream.getVideoTracks()[0];
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (caps.torch) {
+        torchBtn.disabled = false;
+      }
+
+      if (!("BarcodeDetector" in window)) {
+        setStatus("Your browser doesn’t support live QR detection. Use Chrome on Android, or scan with a QR app and paste the code.", "warning");
+        return;
+      }
+
+      detector = new BarcodeDetector({ formats: ["qr_code"] });
+
+      setStatus("Camera ready. Point at a QR code…", "success");
+      scanLoop();
+    } catch (err) {
+      console.error(err);
+      setStatus("Could not access the camera. Check permissions in your browser settings.", "danger");
+    }
+  }
+
+  async function scanLoop() {
+    if (!scanning || !detector) return;
+
+    try {
+      const barcodes = await detector.detect(video);
+      if (barcodes && barcodes.length > 0) {
+        const raw = (barcodes[0].rawValue || "").trim();
+        if (raw) {
+          scanning = false;
+          setStatus("QR detected. Checking in…", "primary");
+
+          // If QR is a URL (Option B), go there directly
+          if (raw.startsWith("http://") || raw.startsWith("https://")) {
+            window.location.href = raw;
+            return;
+          }
+
+          // Otherwise treat it as a checkpoint code (Option A)
+          window.location.href = scanUrlBase + encodeURIComponent(raw) + "/";
+          return;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      // keep looping even if one frame fails
+    }
+
+    requestAnimationFrame(scanLoop);
+  }
+
+  async function stopCamera() {
+    scanning = false;
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    setStatus("Camera stopped.", "secondary");
+  }
+
+  stopBtn.addEventListener("click", stopCamera);
+
+  torchBtn.addEventListener("click", async () => {
+    try {
+      if (!stream) return;
+      const track = stream.getVideoTracks()[0];
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (!caps.torch) return;
+
+      torchOn = !torchOn;
+      await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+      setStatus(torchOn ? "Torch on." : "Torch off.", "info");
+    } catch (e) {
+      console.error(e);
+      setStatus("Torch not available on this device.", "warning");
+    }
+  });
+
+  startCamera();
+
+  // Stop camera when leaving page
+  window.addEventListener("beforeunload", stopCamera);
+</script>
+
+{% endblock %}

@@ -19,9 +19,7 @@
   <div class="card-body">
     <p class="mb-3">{{ incident.description|linebreaks }}</p>
     {% if incident.photo %}
-      <div>
-        <img class="img-fluid rounded" src="{{ incident.photo.url }}" alt="Incident photo">
-      </div>
+      <img class="img-fluid rounded" src="{{ incident.photo.url }}" alt="Incident photo">
     {% endif %}
   </div>
 </div>

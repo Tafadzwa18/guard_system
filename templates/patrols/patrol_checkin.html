@@ -7,10 +7,13 @@
     <h3 class="mb-0">{{ session.route.name }}</h3>
     <div class="text-muted small">Started: {{ session.started_at }}</div>
   </div>
-  <div class="gap-2">
-    <a class="btn btn-danger" href="{% url 'end_patrol' session.id %}">End Patrol</a>
-    <a class="btn btn-outline-danger" href="{% url 'create_incident' session.id %}">Report Incident</a>
-  </div>
+  <div class="d-flex gap-2">
+  <a class="btn btn-outline-danger" href="{% url 'create_incident' session.id %}">Report Incident</a>
+  <a class="btn btn-outline-primary" href="{% url 'session_qr_pack' session.id %}">QR (Auto Check-in)</a>
+  <a class="btn btn-outline-primary" href="{% url 'scan_camera' session.id %}">Scan QR (Camera)</a>
+  <a class="btn btn-danger" href="{% url 'end_patrol' session.id %}">End Patrol</a>
+</div>
+
 
 </div>
 

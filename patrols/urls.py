@@ -7,4 +7,9 @@ urlpatterns = [
     path("guard/patrol/<int:session_id>/", views.patrol_checkin, name="patrol_checkin"),
     path("guard/patrol/<int:session_id>/end/", views.end_patrol, name="end_patrol"),
     path("guard/patrol/<int:session_id>/summary/", views.patrol_summary, name="patrol_summary"),
+    path("guard/patrol/<int:session_id>/scan/<str:code>/", views.qr_scan_checkin, name="qr_scan_checkin"), # QR scan endpoint
+    path("guard/patrol/<int:session_id>/qr-pack/", views.session_qr_pack, name="session_qr_pack"),
+    path("guard/patrol/<int:session_id>/scan-camera/", views.scan_camera, name="scan_camera"),
+
+
 ]

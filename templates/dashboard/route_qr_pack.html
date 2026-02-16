@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}QR Pack{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <div class="small text-muted">{{ route.site.name }}</div>
+    <h3 class="mb-0">QR Pack: {{ route.name }}</h3>
+    <div class="text-muted small">Print these and place them at checkpoints.</div>
+  </div>
+  <button class="btn btn-outline-primary" onclick="window.print()">Print</button>
+</div>
+
+<style>
+  @media print {
+    nav, .btn, .alert { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+  }
+</style>
+
+<div class="row g-3">
+  {% for item in items %}
+  <div class="col-md-4">
+    <div class="card p-3">
+      <div class="fw-semibold">{{ item.checkpoint.order_index }}. {{ item.checkpoint.name }}</div>
+      <div class="small text-muted mb-2">Code: {{ item.checkpoint.code }}</div>
+      <img class="img-fluid" src="data:image/png;base64,{{ item.qr_b64 }}" alt="QR">
+      <div class="small text-muted mt-2">Scan to get code, then paste into check-in.</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
