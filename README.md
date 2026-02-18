@@ -1,14 +1,18 @@
 # Guard Patrolling System 
 
-## What the system should do 
-### Core Idea 
-Admin creates sites, routes, and checkpoints.
-Guard do patrols by checking in at checkpoints (manual codes/QR).
-System tracks who patrolled, when, where and missed points.
-Supervisor see a live dashboard 
+Built using Django, the application  focuses on secure architecture, clear role separation, and scalable design principles. The platform aims to simplify security operations by providing a structured interface for managing guards, monitoring system activity, and maintaining accountability through logging. 
 
-### What it should feel like:
-Start Patrol -> Clear/instant feedback 
-Big buttons, minimal steps
-Clear status (On time/Late/Missed)
-Incident report 
+## Core Idea 
+
+##Secure Authentication System 
+User login and logout functionality. 
+Role-based access control.
+
+##User and Guard Management
+Create and manage user accounts.
+Assign permissions based on roles.
+
+##Activity Tracking 
+Monitor actions performed within the system. 
+Maintain accountabiltiy and tracebility.
+
